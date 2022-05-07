@@ -1,1 +1,1 @@
-Exams and practice from my Baze Podataka 2 class
+Exams and practice from my Databases II class
