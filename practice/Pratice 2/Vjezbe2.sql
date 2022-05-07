@@ -61,4 +61,4 @@ ADD CONSTRAINT FK_Knjiga_Izdavac FOREIGN KEY(IzdavacID) REFERENCES Prodaja.Izdav
 -- KnjigaID 6 karaktera, spoljni ključ
 -- AuOrd kratki cjelobrojni tip podatka
 -- **Definisati primarni ključCREATE TABLE Prodaja.AutoriKnjige (AutorID VARCHAR(11) CONSTRAINT FK_AutoriKnjige_Autori FOREIGN KEY REFERENCES Prodaja.Autori(AutorID),KnjigaID VARCHAR(6) CONSTRAINT FK_AutoriKnjige_Knjige FOREIGN KEY REFERENCES Prodaja.Knjige(KnjigaID),AuOrd TINYINTCONSTRAINT PK_AutoriKnjige PRIMARY KEY(AutorID, KnjigaID))--8. U kreirane tabele izvršiti insert podataka iz baze Pubs (Za polje biljeska tabele Knjige na
---mjestima gdje je vrijednost NULL pohraniti „nepoznata vrijednost“)
+--mjestima gdje je vrijednost NULL pohraniti „nepoznata vrijednost“)INSERT INTO Prodaja.AutoriSELECT A.au_id, A.au_lname, A.au_fname, A.phone, A.address, A.state, A.zip, A.contractFROM pubs.dbo.authors AS A-------------------------------------------INSERT INTO Prodaja.KnjigeSELECT t.title_id, t.title, t.type, t.pub_id, t.price, ISNULL(t.notes, 'NEPOZNATA VRIJEDNOST'), t.pubdateFROM pubs.dbo.titles AS t-------------------------------------------
