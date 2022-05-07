@@ -109,4 +109,7 @@ FROM Narudzbe.Regije
 --   5 SEINSERT INTO Narudzbe.RegijeVALUES(5, 'SE')--16. U tabelu Regije insertovati zapise:
 --6 NE
 --7 NWINSERT INTO Narudzbe.RegijeVALUES(6, 'NE'), (7, 'NW')--17. Upotrebom insert naredbe iz tabele OrderDetails baze Northwind izvršiti kreiranje i
---insertovanje podataka u tabelu StavkeNarudzbe šeme Narudzbe
+--insertovanje podataka u tabelu StavkeNarudzbe šeme NarudzbeSELECT *INTO Narudzbe.StavkeNarudzbeFROM Northwind.dbo.[Order Details]--18. U tabeli StavkeNarudzbe dodati standardnu kolonu ukupno tipa decimalni broj (8,2).ALTER TABLE Narudzbe.StavkeNarudzbeADD Ukupno DECIMAL(8,2)UPDATE Narudzbe.StavkeNarudzbeSET Ukupno = Quantity*UnitPrice--20. U tabeli StavkeNarduzbe dodati izračunatu kolonu CijeliDio u kojoj će biti cijeli dio iz kolone UnitPriceALTER TABLE Narudzbe.StavkeNarudzbeADD CijeliDio AS FLOOR(UnitPrice)--21. U tabeli StavkeNarduzbe kreirati ograničenje na koloni Discount kojim će se onemogućiti unos
+--vrijednosti manjih od 0.
+ALTER TABLE Narudzbe.StavkeNarudzbe
+ADD CONSTRAINT CK_Discount CHECK(Discount>=0)
