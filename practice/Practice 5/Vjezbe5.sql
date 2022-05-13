@@ -8,4 +8,21 @@ FROM [Order Details] AS O
 FROM [Order Details] AS OD
 GROUP BY OD.OrderID
 ORDER BY 2 DESC--7. Prikazati broj stavki narudžbi sa odobrenim popustom. (Northwind)SELECT COUNT(O.Discount)FROM [Order Details] AS OWHERE O.Discount > 0--8. Prikazati broj narudžbi u kojima je unesena regija kupovine. (Northwind)SELECT COUNT(O.ShipRegion) 'Unesena regija kupovine'
-FROM Orders AS O--9. Modificirati prethodni upit tako da se dobije broj narudžbi u kojima nije unesena regija kupovine. (Northwind) 
+FROM Orders AS OWHERE O.ShipRegion IS NOT NULL--9. Modificirati prethodni upit tako da se dobije broj narudžbi u kojima nije unesena regija kupovine. (Northwind) SELECT COUNT(*)FROM Orders as OWHERE O.ShipRegion IS NULL--10. Prikazati ukupne troškove prevoza po uposlenicima. Uslov je da ukupni troškovi
+--prevoza nisu prešli 7500 pri čemu se rezultat treba sortirati opadajućim redoslijedom
+--po visini troškova prevoza. (Northwind)SELECT O.EmployeeID, SUM(O.Freight)FROM Orders as OGROUP BY O.EmployeeIDHAVING SUM(O.Freight) <=7500ORDER BY 2 DESC--11.	Prikazati ukupnu vrijednost troška prevoza po državama ali samo ukoliko je veæa od 4000 za 
+--robu koja se kupila u Francuskoj, Njemaèkoj ili Švicarskoj. (Northwind)
+SELECT SUM(O.Freight),O.ShipCountry
+FROM Orders AS O
+WHERE O.ShipCountry IN ('France','Germany','Switzerland')
+GROUP BY O.ShipCountry
+HAVING SUM(O.Freight)>4000
+--12.	Prikazati ukupan broj modela proizvoda. Lista treba da sadrži ID modela proizvoda i njihov ukupan broj. 
+--Uslov je da proizvod pripada nekom modelu i da je ukupan broj proizvoda po modelu veæi od 3. 
+--U listu ukljuèiti (prebrojati) samo one proizvode èiji naziv poèinje slovom 'S'. (AdventureWorks2017)
+USE AdventureWorks2017
+SELECT PP.ProductModelID,COUNT(PP.ProductModelID) 'Ukupan broj'
+FROM Production.Product AS PP
+WHERE PP.ProductModelID IS NOT NULL AND PP.Name LIKE 'S%'
+GROUP BY PP.ProductModelID
+HAVING COUNT(PP.ProductModelID)>3
