@@ -39,6 +39,7 @@ Kreirati bazu podataka pod vlastitim brojem indeksa
 i aktivirati je.
 */
 
+
 CREATE DATABASE IB200262
 GO
 USE IB200262
@@ -56,17 +57,15 @@ Kreirati tabelu prodavac koja će imati sljedeću strukturu:
 	- prod_kvota, novčani tip
 	- bonus, novčani tip
 */
-
-CREATE TABLE Prodavac 
+CREATE TABLE Prodavac
 (
-prodavac_id INT PRIMARY KEY, 
+prodavac_id INT PRIMARY KEY,
 naziv_posla NVARCHAR(50),
 dtm_rodj DATE,
 bracni_status CHAR,
 prod_kvota MONEY,
 bonus MONEY
 )
-
 /*
 b) 
 Kreirati tabelu prodavnica koja će imati sljedeću strukturu:
@@ -74,14 +73,12 @@ Kreirati tabelu prodavnica koja će imati sljedeću strukturu:
 	- naziv_prodavnice, 50 unicode karaktera
 	- prodavac_id, cjelobrojni tip
 */
-
 CREATE TABLE Prodavnica 
 (
 prodavnica_id INT PRIMARY KEY,
 naziv_prodavnice NVARCHAR(50),
 prodavac_id INT CONSTRAINT FK_Prodavnica_Prodavac FOREIGN KEY REFERENCES Prodavac(prodavac_id)
 )
-
 /*
 c) 
 Kreirati tabelu kupac_detalji koja će imati sljedeću strukturu:
@@ -95,23 +92,18 @@ Kreirati tabelu kupac_detalji koja će imati sljedeću strukturu:
 	- popust, realni tip
 */
 --10 bodova
-
 CREATE TABLE kupac_detalji 
 (
-detalj_id INT IDENTITY (1,1),
+detalj_id INT IDENTITY(1,1),
 kupac_id INT,
-CONSTRAINT PK_kupac_detalji PRIMARY KEY(detalj_id, kupac_id),
-prodavnica_id INT CONSTRAINT FK_kupacDetalji_prodavnica FOREIGN KEY REFERENCES Prodavnica(prodavnica_id),
+CONSTRAINT PK_kupac_detalji PRIMARY KEY(detalj_id,kupac_id),
+prodavnica_id INT CONSTRAINT FK_kupacDetalji_Prodavnica FOREIGN KEY REFERENCES Prodavnica(prodavnica_id),
 br_rac CHAR(10),
 dtm_narudz DATE,
-kolicina TINYINT,
+kolicina SMALLINT,
 cijena MONEY,
 popust REAL
 )
-
-
-
-
 
 --2.
 /*
@@ -126,12 +118,10 @@ tabelu prodavac prema sljedećem pravilu:
 	- SalesQuota -> prod_kvota
 	- Bonus -> nžbonus
 */
-USE AdventureWorks2017
-INSERT INTO IB200262.dbo.Prodavac (prodavac_id, naziv_posla, dtm_rodj, bracni_status, prod_kvota, bonus)
-SELECT E.BusinessEntityID, E.JobTitle, E.BirthDate, E.MaritalStatus, SP.SalesQuota, SP.Bonus
-FROM HumanResources.Employee AS E
-INNER JOIN Sales.SalesPerson AS SP ON SP.BusinessEntityID = E.BusinessEntityID 
-
+INSERT INTO Prodavac(prodavac_id, naziv_posla, dtm_rodj, bracni_status, prod_kvota, bonus)
+SELECT E.BusinessEntityID, E.JobTitle,E.BirthDate, E.MaritalStatus, SP.SalesQuota, Sp.Bonus
+FROM AdventureWorks2017.HumanResources.Employee AS E
+INNER JOIN AdventureWorks2017.Sales.SalesPerson AS SP ON SP.BusinessEntityID = E.BusinessEntityID
 /*
 b)
 Koristeći tabelu Sales.Store baze AdventureWorks2017 
@@ -140,11 +130,10 @@ prema sljedećem pravilu:
 	- BusinessEntityID -> prodavnica_id
 	- Name -> naziv_prodavnice
 	- SalesPersonID -> prodavac_id
-*/
-INSERT INTO IB200262.dbo.Prodavnica(prodavnica_id, naziv_prodavnice, prodavac_id)
+*/*
+INSERT INTO Prodavnica(prodavnica_id, naziv_prodavnice, prodavac_id)
 SELECT S.BusinessEntityID, S.Name, S.SalesPersonID
-FROM Sales.Store AS S
-
+FROM AdventureWorks2017.Sales.Store AS S
 /*
 b)
 Koristeći tabele Sales.Customer, Sales.SalesOrderHeader i SalesOrderDetail
@@ -161,16 +150,12 @@ Uslov je da se ne dohvataju zapisi u kojima su
 StoreID i PersonID NULL vrijednost
 */
 --10 bodova
-INSERT INTO IB200262.dbo.kupac_detalji(kupac_id, prodavnica_id, br_rac, dtm_narudz, kolicina, cijena, popust)
+INSERT INTO kupac_detalji(kupac_id, prodavnica_id, br_rac, dtm_narudz, kolicina, cijena, popust) 
 SELECT C.CustomerID, C.StoreID, C.AccountNumber, SOH.OrderDate, SOD.OrderQty, SOD.UnitPrice, SOD.UnitPriceDiscount
-FROM Sales.Customer AS C
-INNER JOIN Sales.SalesOrderHeader AS SOH ON SOH.CustomerID = C.CustomerID
-INNER JOIN Sales.SalesOrderDetail AS SOD ON SOH.SalesOrderID = SOD.SalesOrderID
-WHERE C.StoreID IS NOT NULL AND c.PersonID IS NOT NULL
-
-
-
-
+FROM AdventureWorks2017.Sales.Customer AS C
+INNER JOIN AdventureWorks2017.Sales.SalesOrderHeader AS SOH ON SOH.CustomerID= C.CustomerID
+INNER JOIN AdventureWorks2017.Sales.SalesOrderDetail AS SOD ON SOD.SalesOrderID = SOH.SalesOrderID
+WHERE C.StoreID IS NOT NULL AND C.PersonID IS NOT NULL
 
 --3.
 /*
@@ -178,7 +163,6 @@ a)
 U tabeli prodavac dodati izračunatu kolonu god_rodj
 u koju će se smještati godina rođenja prodavca.
 */
-USE IB200262
 ALTER TABLE Prodavac
 ADD god_rodj AS YEAR(dtm_rodj)
 
@@ -187,9 +171,8 @@ b)
 U tabeli kupac_detalji promijeniti tip podatka
 kolone cijena iz novčanog u decimalni tip oblika (8,2)
 */
-ALTER TABLE kupac_detalji
+ALTER TABLE kupac_detalji 
 ALTER COLUMN cijena DECIMAL(8,2)
-
 /*
 c)
 U tabeli kupac_detalji dodati standardnu kolonu
@@ -197,7 +180,6 @@ lozinka tipa 20 unicode karaktera.
 */
 ALTER TABLE kupac_detalji
 ADD lozinka NVARCHAR(20)
-
 /*
 d) 
 Kolonu lozinka popuniti tako da bude spojeno 
@@ -205,12 +187,11 @@ Kolonu lozinka popuniti tako da bude spojeno
 numerički dio (bez vodećih nula) iz kolone br_rac
 */
 --10 bodova
-UPDATE kupac_detalji 
-SET kupac_detalji.lozinka = LEFT(CONVERT(varchar(255), NEWID()),10)
+UPDATE kupac_detalji
+SET lozinka = LEFT(CONVERT(nvarchar(255), NEWID()), 10) + RIGHT(br_rac,5)
 
-SELECT*
+SELECT lozinka
 FROM kupac_detalji
-
 
 
 
@@ -223,11 +204,12 @@ Sortirati po nazivu prodavnice.
 */
 --6 bodova
 
-SELECT P.naziv_prodavnice 'Naziv', YEAR(KD.dtm_narudz) 'Godina' ,SUM(KD.kolicina) 'Suma'
-FROM Prodavnica AS P 
-INNER JOIN kupac_detalji AS KD ON KD.prodavnica_id = P.prodavnica_id
+SELECT P.naziv_prodavnice, YEAR(KD.dtm_narudz) 'Godina narucivanja', SUM(KD.kolicina)
+FROM Prodavnica AS P
+INNER JOIN kupac_detalji AS KD ON KD.prodavnica_id = p.prodavnica_id
 GROUP BY P.naziv_prodavnice, YEAR(KD.dtm_narudz)
-ORDER BY 1
+ORDER BY 1 ASC
+
 
 --5.
 /*
@@ -240,14 +222,15 @@ kojima je sumirana vrijednost veća od 1000000.
 */
 --8 bodova
 GO
-CREATE VIEW v_prodavac_cijena
-AS
-SELECT P.prodavac_id, P.bracni_status, SUM(KD.cijena) 'Suma'
-FROM Prodavac AS P
-INNER JOIN Prodavnica AS PP ON PP.prodavac_id = P.prodavac_id
-INNER JOIN kupac_detalji AS KD ON KD.prodavnica_id = PP.prodavnica_id
+CREATE VIEW v_prodavac_cijena AS
+SELECT P.prodavac_id, P.bracni_status, SUM(KD.cijena) 'sum_cijena'
+FROM Prodavac AS P 
+JOIN Prodavnica AS PR ON PR.prodavac_id = P.prodavac_id
+JOIN kupac_detalji AS KD ON KD.prodavnica_id = PR.prodavnica_id
 GROUP BY P.prodavac_id, P.bracni_status
 HAVING SUM(KD.cijena) > 1000000
+GO
+
 
 
 
@@ -261,7 +244,23 @@ vrijednost u koloni sum_cijena veća od srednje vrijednosti kolone sum_cijena.
 Obavezno napisati kod za pokretanje procedure.
 */
 --8 bodova
+GO
+CREATE PROCEDURE p_prodavac_cijena 
+(
+@bracni_status CHAR = M 
+)
+AS
+BEGIN
 
+SELECT*
+FROM v_prodavac_cijena
+WHERE bracni_status = @bracni_status AND sum_cijena > (SELECT AVG(sum_cijena)
+					FROM v_prodavac_cijena)
+
+END
+GO
+
+exec p_prodavac_cijena
 
 
 
