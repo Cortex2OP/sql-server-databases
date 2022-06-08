@@ -33,7 +33,7 @@ a) Kreirati tabelu osoba sljedeće strukture:
 	- broj_kartice	50 UNICODE karaktera
 	- dtm_izdav		datumska varijabla
 */
-
+/*
 CREATE TABLE Osoba 
 (
 osoba_id INT CONSTRAINT PK_Osoba PRIMARY KEY,
@@ -45,7 +45,7 @@ tip_kreditne NVARCHAR(50),
 broj_kartice NVARCHAR(50),
 dtm_izdav DATE
 )
-
+*/
 /*
 c) Kreirati tabelu kupac sljedeće strukture:
 	- kupac_id		cjelobrojna varijabla, primarni ključ
@@ -76,10 +76,10 @@ c) Kreirati tabelu kupovina sljedeće strukture:
 
 CREATE TABLE Kupovina 
 (
-kupovina_id INT NOT NULL,
-detalj_id INT NOT NULL,
+kupovina_id INT,
+detalj_id INT,
 CONSTRAINT PK_Kupovina PRIMARY KEY(kupovina_id,detalj_id),
-narudzbaID NVARCHAR(25),
+narudzba_id NVARCHAR(25),
 kreditna_id INT,
 teritorija_id INT,
 kupac_id INT,
@@ -102,6 +102,12 @@ a) Koristeći tabele Person.Person, Sales.PersonCreditCard i Sales.CreditCard ba
 	- CreditCardID		-> kreditna_id
 	- ModifiedDate		-> dtm_izdav
 */
+INSERT INTO Osoba(osoba_id, ime, prezime, tip_kreditne, tip_osobe, broj_kartice, kreditna_id, dtm_izdav)
+SELECT PP.BusinessEntityID, PP.FirstName, PP.LastName, CC.CardType, PP.PersonType, CC.CardNumber, PCC.CreditCardID, PCC.ModifiedDate
+FROM AdventureWorks2017.Person.Person AS PP
+INNER JOIN AdventureWorks2017.Sales.PersonCreditCard AS PCC ON PCC.BusinessEntityID = PP.BusinessEntityID
+INNER JOIN AdventureWorks2017.Sales.CreditCard AS CC ON CC.CreditCardID = PCC.CreditCardID
+
 
 
 
@@ -113,6 +119,12 @@ b) Koristeći tabelu Sales.Customer baze AdventureWorks2017 izvršiti insert pod
 	- AccountNumber -> br_racuna
 uz uslov da PersonID bude veći od 300.
 */
+INSERT INTO Kupac(kupac_id, osoba_id, prodavnica_id, br_racuna)
+SELECT CustomerID, PersonID, StoreID, AccountNumber
+FROM AdventureWorks2017.Sales.Customer AS C
+WHERE C.CustomerID > 300
+
+
 
 
 /*
@@ -129,6 +141,13 @@ uz uslov da CustomerID bude manji od 29000.
 */
 
 --10 bodova
+INSERT INTO Kupovina(kupovina_id, detalj_id, narudzba_id, kreditna_id, teritorija_id, kupac_id, kolicina, cijena)
+SELECT SOH.SalesOrderID, SOD.SalesOrderDetailID, SOH.PurchaseOrderNumber, SOH.CreditCardID, SOH.TerritoryID, SOH.CustomerID, SOD.OrderQty, SOD.UnitPrice
+FROM AdventureWorks2017.Sales.SalesOrderHeader AS SOH
+INNER JOIN AdventureWorks2017.Sales.SalesOrderDetail AS SOD ON SOD.SalesOrderID = SOH.SalesOrderID
+WHERE SOH.CustomerID < 29000
+
+SELECT * FROM Kupovina
 
 -----------------------------------------------------------------------
 --3.
@@ -147,8 +166,13 @@ Ne prihvata se rješenje koje ne vraća oznake.
 */
 
 --10 bodova
-
-
+GO
+CREATE VIEW view_ukupno AS 
+SELECT O.osoba_id, KU.kolicina * KU.cijena 'Ukupna svota'
+FROM Osoba AS O
+INNER JOIN Kupac AS K ON K.osoba_id = O.osoba_id
+INNER JOIN Kupovina AS KU ON KU.kupac_id = K.kupac_id
+GO
 -----------------------------------------------------------------------
 --4.
 /*
@@ -165,6 +189,11 @@ Između svih dijelova lozinke OBAVEZNO treba biti donja crta.
 b)
 U tabeli kupac u koloni prodavnica_id umjesto NULL vrijednosti ubaciti vrijednost podatka iz kolone osoba_id uvećan za 1.
 */
+
+
+
+ALTER TABLE Osoba
+ADD lozinka NVARCHAR(30) 
 
 --10 bodova
 
