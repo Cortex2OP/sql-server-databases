@@ -275,17 +275,25 @@ Upit treba da vraća kolone kupac_id, prodavnica_id i cijena.
 Sortirati u rastućem redoslijedu prema koloni cijena.
 */
 --8 bodova
-
-
-
-
-
-
+SELECT KD.kupac_id, KD.prodavnica_id, KD.cijena
+FROM kupac_detalji AS KD
+WHERE KD.cijena = 
+(
+SELECT MIN(cijena)
+FROM kupac_detalji) 
+OR CIJENA = 
+(SELECT MAX(cijena)
+FROM kupac_detalji)
+					
 --8.
 /*
 a)
 U tabeli kupac_detalji kreirati kolonu
 cijena_sa_popustom tipa decimal (8,2).
+*/
+ALTER TABLE kupac_detalji
+ADD cijena_sa_popustom DECIMAL(8,2)
+/*
 b) 
 Koristeći tabelu kupac_detalji
 kreirati proceduru p_popust sa parametrom 
@@ -298,6 +306,19 @@ parametra godina 2014.
 Obavezno napisati kod za provjeru sadržaja tabele 
 nakon što se pokrene procedura.
 */
+GO
+CREATE PROCEDURE p_popust 
+(
+@godina INT
+)
+AS
+BEGIN
+
+SELECT*
+FROM kupac_detalji
+
+END
+GO
 --8 bodova
 
 
